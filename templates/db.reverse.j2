@@ -1,0 +1,15 @@
+$ORIGIN .
+$TTL 3600      ; 1 hour
+{{ ( net | ipaddr('revdns') ).split('.')[1:-1] | join('.') }}	IN SOA	{{ ansible_fqdn }}. root.{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }} (
+                4          ; serial
+                86400      ; refresh (1 day)
+                3600       ; retry (1 hour)
+                604800     ; expire (1 week)
+                3600       ; minimum (1 hour)
+				)
+			NS	{{ ansible_fqdn }}.
+$ORIGIN {{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}
+$TTL 3600      ; 1 hour
+{% if (ansible_default_ipv4.address | ipaddr('revdns')).split('.')[1:] | join('.') == ( net | ipaddr('revdns') ).split('.')[1:] | join('.') %}
+{{ ansible_default_ipv4.address.split('.')[-1] }}     PTR {{ ansible_hostname }}.{{ ( ansible_default_ipv4.address | ipaddr('revdns') ).split('.')[1:] | join('.') }}
+{% endif %}

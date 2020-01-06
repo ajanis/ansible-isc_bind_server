@@ -1,0 +1,13 @@
+$ORIGIN .
+$TTL 3600      ; 1 hour
+{{ domain }}	IN SOA	{{ ansible_fqdn }}. root.{{ ansible_domain }}. (
+                4          ; serial
+                86400      ; refresh (1 day)
+                3600       ; retry (1 hour)
+                604800     ; expire (1 week)
+                3600       ; minimum (1 hour)
+				)
+			NS	{{ ansible_fqdn }}.
+$ORIGIN {{ domain }}.
+$TTL 3600      ; 1 hour
+{{ ansible_hostname }}			A	{{ ansible_default_ipv4.address }}
