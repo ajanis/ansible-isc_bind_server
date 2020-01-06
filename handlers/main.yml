@@ -1,2 +1,6 @@
 ---
 # handlers file for isc_bind_server
+
+- name: restart named
+  set_fact:
+    require_named_restart: True

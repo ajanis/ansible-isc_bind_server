@@ -1,2 +1,13 @@
 ---
 # defaults file for isc_bind_server
+
+isc_bind_server_domains:
+  - "{{ ansible_domain }}"
+
+isc_bind_server_subnets: []
+
+isc_bind_server_rndc_secret: GGd1oNCxaKsh8HA84sP1Ug==
+isc_bind_server_rndc_name: foreman
+
+isc_bind_server_forwarders:
+  - 4.2.2.1

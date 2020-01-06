@@ -1,0 +1,9 @@
+---
+isc_bind_server_pkgs:
+  - isc-bind
+  - isc-bind-bind-utils
+
+isc_bind_server_service: named
+
+isc_bind_server_repo_url: "https://copr-be.cloud.fedoraproject.org/results/isc/bind/epel-{{ ansible_distribution_major_version }}-$basearch/"
+isc_bind_server_repo_key_url: "https://copr-be.cloud.fedoraproject.org/results/isc/bind/pubkey.gpg"

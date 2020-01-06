@@ -1,0 +1,67 @@
+# {{ ansible_managed }}
+
+options {
+  directory "/var/named";
+  dump-file "/var/named/data/cache_dump.db";
+  statistics-file "/var/named/data/named_stats.txt";
+};
+
+controls {  inet 127.0.0.1 allow { localhost; } keys { {{ isc_bind_server_rndc_name }}; }; };
+include "/etc/rndc.key";
+
+{% if foreman_proxy_dhcp_subnets is defined and foreman_proxy_dhcp_subnets != None %}
+{% for net in foreman_proxy_dhcp_subnets %}
+
+zone "{{ item.name | ipaddr('revdns') }}" {
+  type master;
+  file "/var/named/{{ item.name | ipaddr('revdns') }}.db";
+  allow-update {key "{{ isc_bind_server_rndc_name }}"; };};
+
+{% endfor %}
+{% endif %}
+
+{% if isc_bind_server_subnets is defined and isc_bind_server_subnets != None %}
+{% for net in isc_bind_server_subnets %}
+
+zone "{{ item.name | ipaddr('revdns') }}" {
+  type master;
+  file "/var/named/{{ item.name | ipaddr('revdns') }}.db";
+  allow-update {key "{{ isc_bind_server_rndc_name }}"; };};
+
+{% endfor %}
+{% endif %}
+
+{% if isc_bind_server_domains is defined and isc_bind_server_domains != None %}
+{% for domain in isc_bind_server_domains %}
+
+zone "{{ domain }}" {
+  type master;
+  file "/var/named/{{ domain }}.db";
+  allow-update {key "{{ isc_bind_server_rndc_name }}"; };};
+logging
+{
+  category update { update_log; };
+  channel update_log
+  {
+    file "/var/named/logs/dns-update.log" versions 2 size 20m;
+    print-time yes;
+    print-category yes;
+    print-severity yes;
+    severity info;
+  };
+};
+{% endfor %}
+{% endif %}
+
+
+
+
+zone "." {
+  type forward;
+  forwarders {
+    {% for ip in isc_bind_server_forwarders %}
+    {{ ip }};
+    {% endfor %}
+    }
+  };
+};

@@ -1,0 +1,27 @@
+---
+- name: "Import ISC Bind Server repository GPG signing key [Debian/Ubuntu]"
+  apt_key:
+    keyserver: "{{ isc_bind_server_repo_keyserver }}"
+    id: "{{ isc_bind_server_repo_key_id }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: "Add ISC Bind Server repository [Debian/Ubuntu]"
+  apt_repository:
+    repo: "{{ isc_bind_server_repo_ppa }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: "Add ISC Bind Server repository [RHEL/CentOS]"
+  yum_repository:
+    name: isc_bind
+    description: "ISC Bind Repo"
+    baseurl: "{{ isc_bind_server_repo_url }}"
+    gpgkey: "{{ isc_bind_server_repo_key_url }}"
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Install bind9
+  package:
+    pkg: "{{ isc_bind_server_pkgs }}"
+    state: present
