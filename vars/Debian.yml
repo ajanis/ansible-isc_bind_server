@@ -1,10 +1,15 @@
 ---
 isc_bind_server_pkgs:
   - bind9
-  - bind9utils
+  - bind9-utils
 
-isc_bind_server_service: bind9
+isc_bind_server_service: named
 
-isc_bind_server_ppa: ppa:isc/bind
+isc_bind_server_repo_ppa: ppa:isc/bind
 isc_bind_server_repo_key_id: 66150059ED19A2882208E278A36654A4FDD4630D
 isc_bind_server_repo_keyserver: keyserver.ubuntu.com
+
+isc_bind_server_confpath: /etc/bind
+
+isc_bind_server_user: bind
+isc_bind_server_group: bind
