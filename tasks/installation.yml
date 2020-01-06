@@ -25,3 +25,9 @@
   package:
     pkg: "{{ isc_bind_server_pkgs }}"
     state: present
+
+- name: Enable named service
+  systemd:
+    name: "{{ isc_bind_server_service }}"
+    state: started
+    enabled: yes
