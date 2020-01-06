@@ -6,7 +6,8 @@ isc_bind_server_domains:
 
 isc_bind_server_subnets: []
 
-isc_bind_server_rndc_secret: GGd1oNCxaKsh8HA84sP1Ug==
+isc_bind_server_rndc_path: /etc/rndc.key
+isc_bind_server_rndc_secret: "{{ vault_isc_bind_server_rndc_secret | default('password') }}"
 isc_bind_server_rndc_name: foreman
 
 isc_bind_server_forwarders:
