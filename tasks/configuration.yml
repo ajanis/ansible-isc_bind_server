@@ -1,70 +1,114 @@
 ---
+
+- name: Ensure bind config directory is present with correct permissions
+  file:
+    path: "{{ isc_bind_server_confpath }}"
+    state: directory
+    owner: "{{ isc_bind_server_user }}"
+    group: "{{ isc_bind_server_group }}"
+    mode: 0777
+
 - name: Copy named conf file
   template:
     src: named.conf.j2
-    dest: /etc/named.conf
-    owner: root
-    group: named
-    mode: 0660
+    dest: "{{ isc_bind_server_confpath }}/named.conf"
+    owner: "{{ isc_bind_server_user }}"
+    group: "{{ isc_bind_server_group }}"
+    mode: 0777
   notify: restart named
 
 - name: Copy rndc.key file
   template:
     src: rndc.key.j2
-    dest: /etc/rndc.key
-    owner: root
-    group: named
-    mode: 0660
+    dest: "{{ isc_bind_server_rndc_path }}"
+    owner: "{{ isc_bind_server_user }}"
+    group: "{{ isc_bind_server_group }}"
+    mode: 0777
   notify: restart named
 
-- name: Ensure named directory exists
-  file:
-    path: /var/named
-    state: directory
-    owner: root
-    group: named
-    mode: 0750
 
-#- name: Copy named conf local file
-#  template:
-#    src: named.conf.local.j2
-#    dest: /var/named/named.conf.local
-#    owner: root
-#    group: named
-#    mode: 0640
-#  notify: restart named
+- name: Check for ISC Bind Server subnets PTR files
+  stat:
+    path: "{{ isc_bind_server_confpath }}/{{ ( item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+  register: isc_subnet_files
+  loop: "{{ isc_bind_server_subnets }}"
+  when:
+    - isc_bind_server_subnets is defined
+    - isc_bind_server_subnets != None
 
-- name: Make zones Directory
-  file:
-    path: /var/named/zones
-    state: directory
-    owner: root
-    group: named
-    mode: 0750
-#
-#- name: Copy reverse file
-#  template:
-#    src: db.reverse.j2
-#    dest: "/var/named/{{ item.name | ipaddr('revdns') }}.db"
-#    owner: root
-#    group: named
-#    mode: 0640
-#  notify: restart named
-#  loop: isc_bind_server_subnets
-#
-#
-#- name: Copy forward file
-#  template:
-#    src: db.forward.j2
-#    dest: "/var/named/zones/{{ item }}.db"
-#    owner: root
-#    group: named
-#    mode: 0640
-#  notify: restart named
-#  loop: isc_bind_server_domains
+
+- name: Create reverse file for any ISC Bind Server subnets
+  template:
+    src: db.reverse.j2
+    dest: "{{ isc_bind_server_confpath }}/{{ ( item.item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+    owner: "{{ isc_bind_server_user }}"
+    group: "{{ isc_bind_server_group }}"
+    mode: 0777
+  notify: restart named
+  loop: "{{ isc_subnet_files.results }}"
+  vars:
+    net: "{{ item.item }}"
+  when:
+    - isc_bind_server_subnets is defined
+    - isc_bind_server_subnets != None
+    - not item.stat.exists
+
+- name: Check for Foreman Proxy subnets PTR files
+  stat:
+    path: "{{ isc_bind_server_confpath }}/{{ ( item.network | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+  register: foreman_subnet_files
+  loop: "{{ foreman_proxy_dhcp_subnets }}"
+  when:
+    - foreman_proxy_dhcp_subnets is defined
+    - foreman_proxy_dhcp_subnets != None
+
+
+- name: Create reverse file for any Foreman Proxy subnets
+  template:
+    src: db.reverse.j2
+    dest: "{{ isc_bind_server_confpath }}/{{ ( item.item.network | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+    owner: "{{ isc_bind_server_user }}"
+    group: "{{ isc_bind_server_group }}"
+    mode: 0777
+  notify: restart named
+  loop: "{{ foreman_subnet_files.results }}"
+  vars:
+    net: "{{ item.item.network }}"
+  when:
+    - foreman_proxy_dhcp_subnets is defined
+    - foreman_proxy_dhcp_subnets != None
+    - not item.stat.exists
+
+- name: Check for Forward DNS files
+  stat:
+    path: "{{ isc_bind_server_confpath }}/{{ item }}.db"
+  register: isc_zone_files
+  loop: "{{ isc_bind_server_domains }}"
+  when:
+    - isc_bind_server_domains is defined
+    - isc_bind_server_domains != None
+
+
+- name: Copy forward file
+  template:
+    src: db.forward.j2
+    dest: "{{ isc_bind_server_confpath }}/{{ item.item }}.db"
+    owner: "{{ isc_bind_server_user }}"
+    group: "{{ isc_bind_server_group }}"
+    mode: 0777
+  notify: restart named
+  loop: "{{ isc_zone_files.results }}"
+  vars:
+    domain: "{{ item.item }}"
+  when:
+    - isc_bind_server_domains is defined
+    - isc_bind_server_domains != None
+    - not item.stat.exists
+
+- meta: flush_handlers
 
 - name: Enable and Restart named service
-  service:
+  systemd:
     name: "{{ isc_bind_server_service }}"
     state: restarted
-    enable: yes
+  when: require_named_restart | default(False)
