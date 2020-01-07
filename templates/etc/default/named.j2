@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+# run resolvconf?
+RESOLVCONF={{ isc_bind_server_default_resolvconf }}
+# startup options for the server
+{% if isc_bind_server_default_options is defined and isc_bind_server_default_options != None %}
+OPTIONS="{{ isc_bind_server_default_options }}"
+{% else %}
+OPTIONS="-u {{ isc_bind_server_user }}"
+{% endif %}
