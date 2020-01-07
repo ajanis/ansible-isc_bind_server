@@ -1,14 +1,10 @@
 ---
 # defaults file for isc_bind_server
 
-isc_bind_server_domains:
-  - "{{ ansible_domain }}"
-
+isc_bind_server_domains: "{{ ansible_dns.search | default(ansible_domain) }}"
+isc_bind_server_forwarders: "{{ ansible_dns.nameservers | default('127.0.0.53') }}"
 isc_bind_server_subnets: []
 
-isc_bind_server_rndc_path: /etc/rndc.key
-isc_bind_server_rndc_secret: "{{ vault_isc_bind_server_rndc_secret | default('password') }}"
 isc_bind_server_rndc_name: foreman
-
-isc_bind_server_forwarders:
-  - 4.2.2.1
+isc_bind_server_rndc_secret: "{{ vault_isc_bind_server_rndc_secret | default('password') }}"
+isc_bind_server_rndc_path: /etc/rndc.key
