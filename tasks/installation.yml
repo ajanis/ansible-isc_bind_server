@@ -26,8 +26,18 @@
     pkg: "{{ isc_bind_server_pkgs }}"
     state: present
 
-- name: Enable named service
+- name: "Create /etc/default file for Bind9 service"
+  template:
+    src: /etc/default/named.j2
+    dest: /etc/default/named
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart named
+
+- name: Enable Bind9 Service
   systemd:
     name: "{{ isc_bind_server_service }}"
     state: started
     enabled: yes
+    daemon_reload: yes
