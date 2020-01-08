@@ -17,7 +17,7 @@ controls {
 include "{{ isc_bind_server_rndc_path }}";
 
 {% if foreman_proxy_dhcp_subnets is defined and foreman_proxy_dhcp_subnets != None %}
-{% for net in foreman_proxy_dhcp_subnets %}
+{% for net in foreman_proxy_dhcp_subnets.split('.')[:-1] | join('.') | unique %}
 
 zone "{{ ( net.network | ipaddr('revdns') ).split('.')[1:] | join('.') }}" IN {
   type master;
@@ -31,7 +31,7 @@ zone "{{ ( net.network | ipaddr('revdns') ).split('.')[1:] | join('.') }}" IN {
 {% endif %}
 
 {% if isc_bind_server_subnets is defined and isc_bind_server_subnets != None %}
-{% for net in isc_bind_server_subnets %}
+{% for net in isc_bind_server_subnets.split('.')[:-1] | join('.') | unique %}
 
 zone "{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}" IN {
   type master;
@@ -45,7 +45,7 @@ zone "{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}" IN {
 {% endif %}
 
 {% if isc_bind_server_domains is defined and isc_bind_server_domains != None %}
-{% for domain in isc_bind_server_domains %}
+{% for domain in isc_bind_server_domains | unique %}
 
 zone "{{ domain }}" IN {
   type master;
