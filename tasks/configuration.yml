@@ -53,9 +53,9 @@
 
 - name: Check for Foreman Proxy subnets PTR files
   stat:
-    path: "{{ isc_bind_server_confpath }}/{{ ( item.network | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+    path: "{{ isc_bind_server_confpath }}/{{ ( item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
   register: foreman_subnet_files
-  loop: "{{ foreman_proxy_dhcp_subnets }}"
+  loop: "{{ foreman_proxy_dhcp_subnets | map(attribute='network') | map('regex_replace','^([0-9]+\\.[0-9]+\\.[0-9]+).*$','\\1') | unique | list }}"
   when:
     - foreman_proxy_dhcp_subnets is defined
     - foreman_proxy_dhcp_subnets != None
@@ -63,14 +63,14 @@
 - name: Create reverse file for any Foreman Proxy subnets
   template:
     src: db.reverse.j2
-    dest: "{{ isc_bind_server_confpath }}/{{ ( item.item.network | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+    dest: "{{ isc_bind_server_confpath }}/{{ ( item.item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
     owner: "{{ isc_bind_server_user }}"
     group: "{{ isc_bind_server_group }}"
     mode: 0777
   notify: restart named
   loop: "{{ foreman_subnet_files.results }}"
   vars:
-    net: "{{ item.item.network }}"
+    net: "{{ item.item }}"
   when:
     - foreman_proxy_dhcp_subnets is defined
     - foreman_proxy_dhcp_subnets != None
