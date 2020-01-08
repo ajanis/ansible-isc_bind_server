@@ -26,7 +26,6 @@
     mode: 0777
   notify: restart named
 
-
 - name: Check for ISC Bind Server subnets PTR files
   stat:
     path: "{{ isc_bind_server_confpath }}/{{ ( item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
@@ -35,7 +34,6 @@
   when:
     - isc_bind_server_subnets is defined
     - isc_bind_server_subnets != None
-
 
 - name: Create reverse file for any ISC Bind Server subnets
   template:
@@ -62,7 +60,6 @@
     - foreman_proxy_dhcp_subnets is defined
     - foreman_proxy_dhcp_subnets != None
 
-
 - name: Create reverse file for any Foreman Proxy subnets
   template:
     src: db.reverse.j2
@@ -88,7 +85,6 @@
     - isc_bind_server_domains is defined
     - isc_bind_server_domains != None
 
-
 - name: Copy forward file
   template:
     src: db.forward.j2
@@ -107,8 +103,29 @@
 
 - meta: flush_handlers
 
-- name: Enable and Restart named service
+- name: Restart Bind9 service
   systemd:
     name: "{{ isc_bind_server_service }}"
     state: restarted
+    enabled: yes
+  register: bind9_restarted
   when: require_named_restart | default(False)
+
+- name: Verify Bind9 service is listening
+  wait_for:
+    host: "{{ ansible_default_ipv4.address }}"
+    port: 53
+    delay: 5
+  ignore_errors: yes
+  register: bind9_start_attempt
+
+- name: Get bind9 journald logs if service does not appear to be up
+  shell: "journalctl _SYSTEMD_INVOCATION_ID=`systemctl show -p InvocationID --value {{ isc_bind_server_service }}.service`"
+  register: bind9_journal
+  when: bind9_start_attempt.failed
+
+- debug:
+    var: |
+      bind9_journal.stdout_lines
+  when: bind9_start_attempt.failed
+  failed_when: bind9_start_attempt.failed
