@@ -28,7 +28,7 @@
 
 - name: "Create /etc/default file for Bind9 service"
   template:
-    src: /etc/default/named.j2
+    src: etc/default/named.j2
     dest: /etc/default/named
     owner: root
     group: root
