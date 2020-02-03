@@ -3,12 +3,16 @@ isc_bind_server_pkgs:
   - isc-bind
   - isc-bind-bind-utils
 
-isc_bind_server_service: named
+isc_bind_server_service: isc-bind-named
 
 isc_bind_server_repo_url: "https://copr-be.cloud.fedoraproject.org/results/isc/bind/epel-{{ ansible_distribution_major_version }}-$basearch/"
 isc_bind_server_repo_key_url: "https://copr-be.cloud.fedoraproject.org/results/isc/bind/pubkey.gpg"
 
-isc_bind_server_confpath: /etc/named
+isc_bind_server_conf_path: /etc/opt/isc/isc-bind
+isc_bind_server_data_path: /var/opt/isc/isc-bind/named/data
+isc_bind_server_daemonopts_path: "{{ isc_bind_server_conf_path }}/sysconfig"
 
 isc_bind_server_user: named
 isc_bind_server_group: named
+
+isc_bind_server_default_options:
