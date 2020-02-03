@@ -1,9 +1,9 @@
 # {{ ansible_managed }}
 
 options {
-  directory "{{ isc_bind_server_confpath }}";
-  dump-file "{{ isc_bind_server_confpath }}/cache_dump.db";
-  statistics-file "{{ isc_bind_server_confpath }}/named_stats.txt";
+  directory "{{ isc_bind_server_data_path }}";
+  dump-file "{{ isc_bind_server_data_path }}/cache_dump.db";
+  statistics-file "{{ isc_bind_server_data_path }}/named_stats.txt";
 };
 
 controls {
@@ -21,7 +21,7 @@ include "{{ isc_bind_server_rndc_path }}";
 
 zone "{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}" IN {
   type master;
-  file "{{ isc_bind_server_confpath }}/{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}db";
+  file "{{ isc_bind_server_data_path }}/{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}db";
   update-policy {
     grant {{ isc_bind_server_rndc_name }} zonesub ANY;
   };
@@ -35,7 +35,7 @@ zone "{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}" IN {
 
 zone "{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}" IN {
   type master;
-  file "{{ isc_bind_server_confpath }}/{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}db";
+  file "{{ isc_bind_server_data_path }}/{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}db";
   update-policy {
     grant {{ isc_bind_server_rndc_name }} zonesub ANY;
   };
@@ -49,7 +49,7 @@ zone "{{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}" IN {
 
 zone "{{ domain }}" IN {
   type master;
-  file "{{ isc_bind_server_confpath }}/{{ domain }}.db";
+  file "{{ isc_bind_server_data_path }}/{{ domain }}.db";
   update-policy {
     grant {{ isc_bind_server_rndc_name }} zonesub ANY;
   };
@@ -58,16 +58,18 @@ zone "{{ domain }}" IN {
 {% endfor %}
 {% endif %}
 
+
 logging {
   category update { update_log; };
   channel update_log {
-    file "{{ isc_bind_server_confpath }}/dns-update.log" versions 2 size 20m;
+    file "{{ isc_bind_server_data_path }}/dns-update.log" versions 2 size 20m;
     print-time yes;
     print-category yes;
     print-severity yes;
     severity info;
   };
 };
+
 
 zone "." {
   type forward;
