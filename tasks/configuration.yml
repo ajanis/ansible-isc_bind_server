@@ -2,19 +2,29 @@
 
 - name: Ensure bind config directory is present with correct permissions
   file:
-    path: "{{ isc_bind_server_confpath }}"
+    path: "{{ isc_bind_server_conf_path }}"
     state: directory
     owner: "{{ isc_bind_server_user }}"
     group: "{{ isc_bind_server_group }}"
-    mode: 0777
+    mode: 0755
+    recurse: yes
+
+- name: Ensure bind data directory is present with correct permissions
+  file:
+    path: "{{ isc_bind_server_data_path }}"
+    state: directory
+    owner: "{{ isc_bind_server_user }}"
+    group: "{{ isc_bind_server_group }}"
+    mode: 0755
+    recurse: yes
 
 - name: Copy named conf file
   template:
     src: named.conf.j2
-    dest: "{{ isc_bind_server_confpath }}/named.conf"
+    dest: "{{ isc_bind_server_conf_path }}/named.conf"
     owner: "{{ isc_bind_server_user }}"
     group: "{{ isc_bind_server_group }}"
-    mode: 0777
+    mode: 0755
   notify: restart named
 
 - name: Copy rndc.key file
@@ -28,7 +38,7 @@
 
 - name: Check for ISC Bind Server subnets PTR files
   stat:
-    path: "{{ isc_bind_server_confpath }}/{{ ( item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+    path: "{{ isc_bind_server_data_path }}/{{ ( item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
   register: isc_subnet_files
   loop: "{{ isc_bind_server_subnets }}"
   when:
@@ -38,10 +48,10 @@
 - name: Create reverse file for any ISC Bind Server subnets
   template:
     src: db.reverse.j2
-    dest: "{{ isc_bind_server_confpath }}/{{ ( item.item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+    dest: "{{ isc_bind_server_data_path }}/{{ ( item.item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
     owner: "{{ isc_bind_server_user }}"
     group: "{{ isc_bind_server_group }}"
-    mode: 0777
+    mode: 0755
   notify: restart named
   loop: "{{ isc_subnet_files.results }}"
   vars:
@@ -53,7 +63,7 @@
 
 - name: Check for Foreman Proxy subnets PTR files
   stat:
-    path: "{{ isc_bind_server_confpath }}/{{ ( item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+    path: "{{ isc_bind_server_data_path }}/{{ ( item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
   register: foreman_subnet_files
   loop: "{{ foreman_proxy_dhcp_subnets | map(attribute='network') | map('regex_replace','^([0-9]+\\.[0-9]+\\.[0-9]+).*$','\\1') | unique | list }}"
   when:
@@ -63,10 +73,10 @@
 - name: Create reverse file for any Foreman Proxy subnets
   template:
     src: db.reverse.j2
-    dest: "{{ isc_bind_server_confpath }}/{{ ( item.item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
+    dest: "{{ isc_bind_server_data_path }}/{{ ( item.item | ipaddr('revdns') ).split('.')[1:] | join('.') }}db"
     owner: "{{ isc_bind_server_user }}"
     group: "{{ isc_bind_server_group }}"
-    mode: 0777
+    mode: 0755
   notify: restart named
   loop: "{{ foreman_subnet_files.results }}"
   vars:
@@ -78,7 +88,7 @@
 
 - name: Check for Forward DNS files
   stat:
-    path: "{{ isc_bind_server_confpath }}/{{ item }}.db"
+    path: "{{ isc_bind_server_data_path }}/{{ item }}.db"
   register: isc_zone_files
   loop: "{{ isc_bind_server_domains }}"
   when:
@@ -88,10 +98,10 @@
 - name: Copy forward file
   template:
     src: db.forward.j2
-    dest: "{{ isc_bind_server_confpath }}/{{ item.item }}.db"
+    dest: "{{ isc_bind_server_data_path }}/{{ item.item }}.db"
     owner: "{{ isc_bind_server_user }}"
     group: "{{ isc_bind_server_group }}"
-    mode: 0777
+    mode: 0755
   notify: restart named
   loop: "{{ isc_zone_files.results }}"
   vars:
