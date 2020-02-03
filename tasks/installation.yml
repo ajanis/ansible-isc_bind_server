@@ -6,9 +6,17 @@
   when:
     - ansible_os_family == "RedHat"
 
+- name: Get FirewallD public zone target
+  command: firewall-cmd --zone public --get-target --permanent
+  register: firewalld_public_target
+  changed_when: False
+  when:
+    - ansible_os_family == "RedHat"
+
 - name: Set FirewallD public zone to allow-all
   command: firewall-cmd --permanent --zone=public --set-target=ACCEPT
   when:
+    - firewalld_public_target.stdout != "ACCEPT"
     - ansible_os_family == "RedHat"
 
 - name: "Import ISC Bind Server repository GPG signing key [Debian/Ubuntu]"
@@ -53,3 +61,19 @@
     state: started
     enabled: yes
     daemon_reload: yes
+
+- name: Create symlink to isc-bind-named binaries (RHEL/CentOS)
+  block:
+    - name: List all isc-bind-named binaries
+      shell: ls /opt/isc/isc-bind/root/bin/
+      register: isc_binaries
+      changed_when: False
+
+    - name: Create symlinks
+      file:
+        src: "/opt/isc/isc-bind/root/bin/{{ item }}"
+        dest: "/usr/local/bin/{{ item }}"
+        state: link
+      loop: "{{ isc_binaries.stdout_lines }}"
+  when:
+    - ansible_os_family == "RedHat"
