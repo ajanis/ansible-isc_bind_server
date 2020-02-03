@@ -7,6 +7,9 @@ isc_bind_server_subnets: []
 
 isc_bind_server_rndc_name: foreman
 isc_bind_server_rndc_secret: "{{ vault_isc_bind_server_rndc_secret | default('password') }}"
-isc_bind_server_rndc_path: /etc/rndc.key
+isc_bind_server_rndc_path: "/etc/rndc.key"
+isc_bind_server_conf_path: /etc/bind
+isc_bind_server_data_path: /var/cache/bind
+isc_bind_server_daemonopts_path: /etc/default
 isc_bind_server_default_resolvconf: "yes"
 isc_bind_server_default_options:
