@@ -1,4 +1,16 @@
 ---
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+  when:
+    - ansible_os_family == "RedHat"
+
+- name: Set FirewallD public zone to allow-all
+  command: firewall-cmd --permanent --zone=public --set-target=ACCEPT
+  when:
+    - ansible_os_family == "RedHat"
+
 - name: "Import ISC Bind Server repository GPG signing key [Debian/Ubuntu]"
   apt_key:
     keyserver: "{{ isc_bind_server_repo_keyserver }}"
@@ -26,13 +38,13 @@
     pkg: "{{ isc_bind_server_pkgs }}"
     state: present
 
-- name: "Create /etc/default file for Bind9 service"
+- name: "Create daemon options file for Bind9 service"
   template:
     src: etc/default/named.j2
-    dest: /etc/default/named
-    owner: root
-    group: root
-    mode: 0644
+    dest: "{{ isc_bind_server_daemonopts_path }}/named"
+    owner: "{{ isc_bind_server_user }}"
+    group: "{{ isc_bind_server_group }}"
+    mode: 0755
   notify: restart named
 
 - name: Enable Bind9 Service
