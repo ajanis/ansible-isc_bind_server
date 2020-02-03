@@ -64,16 +64,17 @@
 
 - name: Create symlink to isc-bind-named binaries (RHEL/CentOS)
   block:
-    - name: List all isc-bind-named binaries
-      shell: ls /opt/isc/isc-bind/root/bin/
+    - name: Find all isc-bind-named binaries
+      find:
+        paths: /opt/isc/isc-bind/root/bin/
       register: isc_binaries
-      changed_when: False
+      #changed_when: False
 
-    - name: Create symlinks
+    - name: Create symlinks to isc-bind-named binaries in /usr/local/bin/
       file:
-        src: "/opt/isc/isc-bind/root/bin/{{ item }}"
-        dest: "/usr/local/bin/{{ item }}"
+        src: "{{ item.path }}"
+        dest: "/usr/local/bin/{{ item.path | basename }}"
         state: link
-      loop: "{{ isc_binaries.stdout_lines }}"
+      loop: "{{ isc_binaries.files }}"
   when:
     - ansible_os_family == "RedHat"
