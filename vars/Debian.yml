@@ -9,7 +9,11 @@ isc_bind_server_repo_ppa: ppa:isc/bind
 isc_bind_server_repo_key_id: 66150059ED19A2882208E278A36654A4FDD4630D
 isc_bind_server_repo_keyserver: keyserver.ubuntu.com
 
-isc_bind_server_confpath: /etc/bind
+isc_bind_server_conf_path: /etc/bind
+isc_bind_server_data_path: /var/cache/bind
+isc_bind_server_daemonopts_path: /etc/default
 
 isc_bind_server_user: bind
 isc_bind_server_group: bind
+
+isc_bind_server_default_options: "-u {{ isc_bind_server_user }}"
