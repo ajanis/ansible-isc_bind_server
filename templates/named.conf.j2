@@ -4,6 +4,11 @@ options {
   directory "{{ isc_bind_server_data_path }}";
   dump-file "{{ isc_bind_server_data_path }}/cache_dump.db";
   statistics-file "{{ isc_bind_server_data_path }}/named_stats.txt";
+  allow-query {
+    {% for query_host in isc_bind_server_allow_query_hosts %}
+      {{ query_host }};
+    {% endfor %}
+  };
 };
 
 controls {
