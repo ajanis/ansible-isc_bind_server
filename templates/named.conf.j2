@@ -1,14 +1,29 @@
 # {{ ansible_managed }}
 
 options {
-  directory "{{ isc_bind_server_data_path }}";
-  dump-file "{{ isc_bind_server_data_path }}/cache_dump.db";
-  statistics-file "{{ isc_bind_server_data_path }}/named_stats.txt";
+
+  listen-on {
+    {% for v4_interface in ( isc_bind_server_ipv4_interface | default('any') ) %}
+      {{ v4_interface }};
+    {% endfor %}
+  };
+
+  listen-on-v6 {
+    {% for v6_interface in ( isc_bind_server_ipv6_interface | default('::1') ) %}
+      {{ v6_interface }};
+    {% endfor %}
+  };
+
   allow-query {
-    {% for query_host in isc_bind_server_allow_query_hosts %}
+    {% for query_host in ( isc_bind_server_allow_query_hosts | default('any') ) %}
       {{ query_host }};
     {% endfor %}
   };
+
+  dnssec-validation auto;
+  directory "{{ isc_bind_server_data_path }}";
+  dump-file "{{ isc_bind_server_data_path }}/cache_dump.db";
+  statistics-file "{{ isc_bind_server_data_path }}/named_stats.txt";
 };
 
 controls {
