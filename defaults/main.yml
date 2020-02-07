@@ -13,7 +13,8 @@ isc_bind_server_data_path: /var/cache/bind
 isc_bind_server_daemonopts_path: /etc/default
 isc_bind_server_default_resolvconf: "yes"
 isc_bind_server_default_options:
-
+isc_bind_server_allow_query_hosts:
+  - any
 isc_bind_server_allowed_ports:
   - "53/tcp"
   - "953/tcp"
