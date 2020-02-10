@@ -27,11 +27,13 @@
     state: present
   when: ansible_os_family == "Debian"
 
-- name: Add EPEL repository [CentOS]
-  yum:
-    name: epel-release
+- name: "Add ISC Bind Server repository [RHEL/CentOS]"
+  yum_repository:
+    name: isc_bind
+    description: "ISC Bind Repo"
+    baseurl: "{{ isc_bind_server_repo_url }}"
+    gpgkey: "{{ isc_bind_server_repo_key_url }}"
     state: present
-    update_cache: yes
   when: ansible_os_family == "RedHat"
 
 - name: Install bind9
