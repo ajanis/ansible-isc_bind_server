@@ -113,13 +113,12 @@
 
 - meta: flush_handlers
 
-- name: Restart Bind9 service
+- name: "Start/Restart the Bind9 service"
   systemd:
     name: "{{ isc_bind_server_service }}"
-    state: restarted
+    state: "{% if require_named_restart | default(false) %}restarted{% else %}started{% endif %}"
     enabled: yes
   register: bind9_restarted
-  when: require_named_restart | default(False)
 
 - name: Verify Bind9 service is listening
   wait_for:
