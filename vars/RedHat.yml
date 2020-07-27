@@ -18,7 +18,7 @@ isc_bind_server_group: named
 isc_bind_server_default_options:
 
 isc_bind_server_allowed_ports:
-  - "53/udp"
   - "53/tcp"
-  - "953/udp"
   - "953/tcp"
+  - "53/udp"
+  - "953/udp"
