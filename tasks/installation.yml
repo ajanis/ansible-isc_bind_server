@@ -50,13 +50,6 @@
     mode: 0755
   notify: restart named
 
-- name: Enable Bind9 Service
-  systemd:
-    name: "{{ isc_bind_server_service }}"
-    state: started
-    enabled: yes
-    daemon_reload: yes
-
 - name: Create symlink to isc-bind-named binaries (RHEL/CentOS)
   block:
     - name: Find all isc-bind-named binaries
