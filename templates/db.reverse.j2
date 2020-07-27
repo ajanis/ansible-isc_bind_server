@@ -11,5 +11,5 @@ $TTL 3600      ; 1 hour
 $ORIGIN {{ ( net | ipaddr('revdns') ).split('.')[1:] | join('.') }}
 $TTL 3600      ; 1 hour
 {% if (ansible_default_ipv4.address | ipaddr('revdns')).split('.')[1:] | join('.') == ( net | ipaddr('revdns') ).split('.')[1:] | join('.') %}
-{{ ansible_default_ipv4.address.split('.')[-1] }}     PTR {{ ansible_hostname }}.{{ ( ansible_default_ipv4.address | ipaddr('revdns') ).split('.')[1:] | join('.') }}
+{{ ansible_default_ipv4.address.split('.')[-1] }}     PTR {{ ansible_hostname }}.{{ ansible_domain }}.
 {% endif %}
