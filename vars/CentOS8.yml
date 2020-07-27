@@ -1,0 +1,28 @@
+---
+# defaults file for isc_bind_server
+
+isc_bind_server_domains: "{{ ansible_dns.search | default(ansible_domain) }}"
+isc_bind_server_forwarders: "{{ ansible_dns.nameservers | default('127.0.0.53') }}"
+isc_bind_server_subnets: []
+
+
+isc_bind_server_conf_path: /etc/bind
+isc_bind_server_data_path: /var/cache/bind
+isc_bind_server_daemonopts_path: /etc/default
+isc_bind_server_default_resolvconf: "yes"
+isc_bind_server_rndc_name: foreman
+isc_bind_server_rndc_secret: "{{ vault_isc_bind_server_rndc_secret | default('password') }}"
+isc_bind_server_rndc_path: "{{ isc_bind_server_conf_path }}/rndc.key"
+isc_bind_server_default_options:
+isc_bind_server_allow_query_hosts:
+  - 'any'
+isc_bind_server_ipv4_interface:
+  - 'any'
+isc_bind_server_ipv6_interface:
+  - '::1'
+isc_bind_server_allowed_ports:
+  - "53/tcp"
+  - "953/tcp"
+  - "53/udp"
+  - "953/udp"
+fff
