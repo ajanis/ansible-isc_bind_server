@@ -21,5 +21,7 @@ isc_bind_server_ipv4_interface:
 isc_bind_server_ipv6_interface:
   - '::1'
 isc_bind_server_allowed_ports:
+  - "53/udp"
   - "53/tcp"
+  - "953/udp"
   - "953/tcp"
