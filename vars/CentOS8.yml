@@ -25,4 +25,3 @@ isc_bind_server_allowed_ports:
   - "953/tcp"
   - "53/udp"
   - "953/udp"
-fff
