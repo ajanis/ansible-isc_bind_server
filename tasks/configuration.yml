@@ -30,11 +30,14 @@
 - name: Copy rndc.key file
   template:
     src: rndc.key.j2
-    dest: "{{ isc_bind_server_rndc_path }}"
+    dest: "{{ item }}"
     owner: "{{ isc_bind_server_user }}"
     group: "{{ isc_bind_server_group }}"
     mode: 0777
   notify: restart named
+  loop:
+    - "{{ isc_bind_server_rndc_path }}"
+    - /etc/rndc.key
 
 - name: Check for ISC Bind Server subnets PTR files
   stat:
